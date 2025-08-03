@@ -17,11 +17,11 @@ jobs:
           node-version: '20'
       - name: Lint HTML files
         run: npx htmlhint "**/*.html"
-      - name: upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-files
-          path: '**/*.html'
+      # - name: upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: html-files
+      #     path: '**/*.html'
   test-infrastructure:
     runs-on: ubuntu-latest
     defaults:
