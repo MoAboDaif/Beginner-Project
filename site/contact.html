@@ -1,6 +1,82 @@
-<form action="https://example.com/form-handler" method="POST">
-  <input type="text" name="name" placeholder="Your Name" required />
-  <input type="email" name="email" placeholder="Your Email" required />
-  <textarea name="message" required></textarea>
-  <button type="submit">Send</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #0077cc;
+    }
+    nav {
+      margin-bottom: 30px;
+    }
+    nav a {
+      margin-right: 15px;
+      text-decoration: none;
+      color: #0077cc;
+      font-weight: bold;
+    }
+    form {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      max-width: 400px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    button {
+      background: #0077cc;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Back to Home</a>
+    <a href="products.html">View Products</a>
+    <a href="contact.html">Contact Us</a>
+  </nav>
+  <h1>Contact Us</h1>
+  <form action="https://example.com/form-handler" method="POST">
+    <label for="name">Your Name</label>
+    <input type="text" id="name" name="name" placeholder="Your Name" required />
+
+    <label for="email">Your Email</label>
+    <input type="email" id="email" name="email" placeholder="Your Email" required />
+
+    <label for="message">Message</label>
+    <textarea id="message" name="message" placeholder="Type your message here..." rows="5" required></textarea>
+
+    <button type="submit">Send</button>
+  </form>
+</body>
+</html>

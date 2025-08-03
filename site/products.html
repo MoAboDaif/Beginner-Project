@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Our Products</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #343a40;
+      color: #fff;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 2.2rem;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .product-card {
+      background: #f1f3f6;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      padding: 1rem;
+      text-align: center;
+      transition: box-shadow 0.2s;
+    }
+    .product-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    .product-img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+    }
+    .product-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0.5rem 0;
+    }
+    .product-desc {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 0.7rem;
+    }
+    .product-price {
+      font-size: 1.1rem;
+      color: #007bff;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .buy-btn {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .buy-btn:hover {
+      background: #0056b3;
+    }
+    @media (max-width: 600px) {
+      main {
+        padding: 0.5rem;
+      }
+      .products-grid {
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Our Products</h1>
+    <p>Browse our selection of quality items</p>
+  </header>
+  <main>
+    <section class="products-grid">
+      <div class="product-card">
+        <img src="https://via.placeholder.com/100?text=Product+1" alt="Product 1" class="product-img">
+        <div class="product-title">Wireless Headphones</div>
+        <div class="product-desc">High-quality sound, comfortable fit, long battery life.</div>
+        <div class="product-price">$49.99</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/100?text=Product+2" alt="Product 2" class="product-img">
+        <div class="product-title">Smart Watch</div>
+        <div class="product-desc">Track your fitness, receive notifications, stylish design.</div>
+        <div class="product-price">$79.99</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/100?text=Product+3" alt="Product 3" class="product-img">
+        <div class="product-title">Bluetooth Speaker</div>
+        <div class="product-desc">Portable, powerful bass, waterproof.</div>
+        <div class="product-price">$29.99</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/100?text=Product+4" alt="Product 4" class="product-img">
+        <div class="product-title">Fitness Tracker</div>
+        <div class="product-desc">Monitor your health, sleep tracking, lightweight.</div>
+        <div class="product-price">$39.99</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
