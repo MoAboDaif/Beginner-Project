@@ -89,11 +89,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: html-files
-      - name: install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
       - name: config AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
