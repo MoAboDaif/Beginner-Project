@@ -1,0 +1,16 @@
+name: deploy s3 static website
+run-name:  Beginner Project – “Static Product Portfolio Site”
+on:
+  push:
+jobs:
+  web-content-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Node.js setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 
+        run: npx htmlhint "**/*.html"
