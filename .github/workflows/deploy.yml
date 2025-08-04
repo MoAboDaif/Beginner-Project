@@ -48,7 +48,7 @@ jobs:
       - name: ${{ github.ref_name }} Workspace
         run: terraform workspace select  ${{ github.ref_name }}  || terraform workspace new  ${{ github.ref_name }}
       - name: Terraform plan
-        run: terraform plan -out= ${{ github.ref_name }}-tfplan
+        run: terraform plan -out=${{ github.ref_name }}-tfplan
       - name: artifact upload
         uses: actions/upload-artifact@v4
         with:
