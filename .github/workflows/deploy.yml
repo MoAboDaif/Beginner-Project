@@ -87,8 +87,8 @@ jobs:
         run: terraform apply -auto-approve tfplan
       - name: Terraform output
         run: |
-          echo "test_bucket_name=$(terraform output -raw s3_bucket_name)"
-          echo "test_website_url=$(terraform output -raw static_website_url)"
+          echo "test_bucket_name=$(terraform output -raw s3_bucket_name)"  2>/dev/null
+          echo "test_website_url=$(terraform output -raw static_website_url)"  2>/dev/null
           # echo "test_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
           # echo "test_website_url=$(terraform output -raw static_website_url)" >> $GITHUB_ENV
 
