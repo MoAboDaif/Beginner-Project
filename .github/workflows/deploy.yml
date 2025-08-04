@@ -89,28 +89,26 @@ jobs:
         run: |
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
 
-          echo "test_bucket_name=$($TF output -raw s3_bucket_name)"
-          echo "test_website_url=$($TF output -raw static_website_url)"
-          # echo "test_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
-          # echo "test_website_url=$(terraform output -raw static_website_url)" >> $GITHUB_ENV
+          echo "test_bucket_name=$($TF output -raw s3_bucket_name)" >> $GITHUB_ENV
+          echo "test_website_url=$($TF output -raw static_website_url)" >> $GITHUB_ENV
 
-  # upload-website:
-  #   runs-on: ubuntu-latest
-  #   needs: [web-content-test, test-deploy]
-  #   steps:
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: html-files
-  #     - name: config AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v3
-  #       with:
-  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-  #         aws-region: eu-central-1
-  #     - name: Upload files to S3
-  #       run: |
-  #         aws s3 sync . s3://${{ needs.test-deploy.outputs.test_bucket_name }} --exclude "*" --include "*.html"
-  #         echo "Website deployed to: ${{ needs.test-deploy.outputs.test_website_url }}"
+  upload-website:
+    runs-on: ubuntu-latest
+    needs: [web-content-test, test-deploy]
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: html-files
+      - name: config AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+      - name: Upload files to S3
+        run: |
+          aws s3 sync . s3://${{ needs.test-deploy.outputs.test_bucket_name }} --exclude "*" --include "*.html"
+          echo "Website deployed to: ${{ needs.test-deploy.outputs.test_website_url }}"
   # destroy-test-infrastructure:
   #   runs-on: ubuntu-latest
   #   needs: test-deploy
