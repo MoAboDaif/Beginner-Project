@@ -127,7 +127,7 @@ jobs:
       - name: config AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: ${{ needs.test-deploy.outputs.aws_role_arn }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
       - name: Terraform setup
         uses: hashicorp/setup-terraform@v2
