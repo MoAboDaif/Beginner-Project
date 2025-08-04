@@ -86,6 +86,7 @@ jobs:
       - name: Terraform apply
         run: terraform apply -auto-approve tfplan
       - name: Terraform output
+        id: test-deploy
         run: |
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
 
@@ -108,7 +109,7 @@ jobs:
       - name: Upload files to S3
         run: |
           aws s3 sync . s3://${{ needs.test-deploy.outputs.test_bucket_name }} --exclude "*" --include "*.html"
-          echo "Website deployed to: ${{ needs.test-deploy.outputs.test_website_url }}"
+          echo "Website deployed to: http://${{ needs.test-deploy.outputs.test_website_url }}"
   # destroy-test-infrastructure:
   #   runs-on: ubuntu-latest
   #   needs: test-deploy
