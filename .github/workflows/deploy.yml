@@ -52,8 +52,12 @@ jobs:
         with:
           name: terraform-plan
           path: terraform/tfplan
+
   test-deploy:
     runs-on: ubuntu-latest
+    outputs:
+      test_bucket_name: ${{ steps.terraform_output.outputs.test_bucket_name }}
+      test_website_url: ${{ steps.terraform_output.outputs.test_website_url }}
     needs: test-infrastructure
     defaults:
       run:
@@ -81,6 +85,11 @@ jobs:
         run: terraform workspace select test || terraform workspace new test
       - name: Terraform apply
         run: terraform apply -auto-approve tfplan
+      - name: Terraform output
+        run: |
+          echo 'test_bucket_name=`terraform output -raw bucket_name`' >> $GITHUB_ENV
+          echo 'test_website_url=`terraform output -raw website_url`' >> $GITHUB_ENV
+
   upload-website:
     runs-on: ubuntu-latest
     needs: [web-content-test, test-deploy]
@@ -96,4 +105,71 @@ jobs:
           aws-region: eu-central-1
       - name: Upload files to S3
         run: |
-          aws s3 sync . s3://$AWS_S3_BUCKET_NAME --exclude "*" --include "*.html"
+          aws s3 sync . s3://${{ needs.test-deploy.outputs.test_bucket_name }} --exclude "*" --include "*.html"
+          echo "Website deployed to: ${{ needs.test-deploy.outputs.test_website_url }}"
+  # destroy-test-infrastructure:
+  #   runs-on: ubuntu-latest
+  #   needs: test-deploy
+  #   environment: test-destroy-approval
+  #   defaults:
+  #     run:
+  #       working-directory: terraform
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: config AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+  #         aws-region: eu-central-1
+  #     - name: Terraform setup
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.12
+  #     - name: Terraform init
+  #       run: terraform init
+  #     - name: test Workspace
+  #       run: terraform workspace select test || terraform workspace new test
+  #     - name: Terraform destroy
+  #       run: terraform destroy -auto-approve
+  # deploy-production-infrastructure:
+  #   runs-on: ubuntu-latest
+  #   needs: test-deploy
+  #   environment: production-infrastructure-approval
+  #   defaults:
+  #     run:
+  #       working-directory: terraform
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: config AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+  #         aws-region: eu-central-1
+  #     - name: Terraform setup
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.12
+  #     - name: Terraform init
+  #       run: terraform init
+  #     - name: test Workspace
+  #       run: terraform workspace select production || terraform workspace new production
+  #     - name: Terraform apply
+  #       run: terraform apply -auto-approve
+  # deploy-production-website:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy-production-infrastructure
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: html-files
+  #     - name: config AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+  #         aws-region: eu-central-1
+  #     - name: Upload files to S3
+  #       run: |
+  #         aws s3 sync . s3://$AWS_S3_BUCKET_NAME --exclude "*" --include "*.html"
