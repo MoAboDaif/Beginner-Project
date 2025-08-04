@@ -86,7 +86,7 @@ jobs:
       - name: Terraform apply
         run: terraform apply -auto-approve tfplan
       - name: Terraform output
-        id: test-deploy
+        id: terraform_output
         run: |
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
 
