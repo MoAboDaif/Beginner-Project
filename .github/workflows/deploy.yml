@@ -25,6 +25,7 @@ jobs:
           path: 'site/*.html'
   test-infrastructure:
     runs-on: ubuntu-latest
+    needs: web-content-test
     defaults:
       run:
         working-directory: terraform
@@ -44,15 +45,15 @@ jobs:
         run: terraform init
       - name: Terraform validate
         run: terraform validate
-      - name: test Workspace
-        run: terraform workspace select test || terraform workspace new test
+      - name: ${{ github.ref_name }} Workspace
+        run: terraform workspace select  ${{ github.ref_name }}  || terraform workspace new  ${{ github.ref_name }}
       - name: Terraform plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -out= ${{ github.ref_name }}-tfplan
       - name: artifact upload
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: terraform/tfplan
+          path: ${{ github.ref_name }}-tfplan
 
   test-deploy:
     runs-on: ubuntu-latest
@@ -83,9 +84,9 @@ jobs:
       - name: Terraform init
         run: terraform init
       - name: test Workspace
-        run: terraform workspace select test || terraform workspace new test
+        run: terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
       - name: Terraform apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve ${{ github.ref_name }}-tfplan
       - name: Terraform output
         id: terraform_output
         run: |
