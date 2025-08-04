@@ -58,7 +58,6 @@ jobs:
     outputs:
       test_bucket_name: ${{ steps.terraform_output.outputs.test_bucket_name }}
       test_website_url: ${{ steps.terraform_output.outputs.test_website_url }}
-      aws_role_arn: ${{ steps.terraform_output.outputs.aws_role_arn }}
     needs: test-infrastructure
     defaults:
       run:
@@ -93,7 +92,6 @@ jobs:
 
           echo "test_bucket_name=$($TF output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
           echo "test_website_url=$($TF output -raw static_website_url)" >> $GITHUB_OUTPUT
-          echo "aws_role_arn=${{ secrets.AWS_ROLE_ARN }}" >> $GITHUB_OUTPUT
 
   upload-website:
     runs-on: ubuntu-latest
