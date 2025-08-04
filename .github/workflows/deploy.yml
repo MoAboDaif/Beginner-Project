@@ -89,8 +89,8 @@ jobs:
         run: |
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
 
-          test_bucket_name="$($TF output -raw s3_bucket_name)"
-          test_website_url="$($TF output -raw static_website_url)"
+          echo "test_bucket_name=$($TF output -raw s3_bucket_name)"
+          echo "test_website_url=$($TF output -raw static_website_url)"
           # echo "test_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
           # echo "test_website_url=$(terraform output -raw static_website_url)" >> $GITHUB_ENV
 
