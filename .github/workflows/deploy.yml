@@ -45,14 +45,14 @@ jobs:
         run: |
           terraform init
           terraform validate
-          terraform workspace select  ${{ github.ref_name }}-${{ github.run_number }} \
-          || terraform workspace new  ${{ github.ref_name }}-${{ github.run_number }} 
-          terraform plan -out=${{ github.ref_name }}-${{ github.run_number }}-tfplan
+          terraform workspace select  test-${{ github.ref_name }}-${{ github.run_number }} \
+          || terraform workspace new  test-${{ github.ref_name }}-${{ github.run_number }} 
+          terraform plan -out=test-${{ github.ref_name }}-${{ github.run_number }}-tfplan
       - name: artifact upload
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: terraform/${{ github.ref_name }}-${{ github.run_number }}-tfplan
+          path: terraform/test-${{ github.ref_name }}-${{ github.run_number }}-tfplan
 
   deploy-test-infrastructure:
     runs-on: ubuntu-latest
@@ -83,9 +83,9 @@ jobs:
       - name: Terraform init
         run: terraform init
       - name: test Workspace
-        run: terraform workspace select ${{ github.ref_name }}-${{ github.run_number }} || terraform workspace new ${{ github.ref_name }}-${{ github.run_number }}
+        run: terraform workspace select test-${{ github.ref_name }}-${{ github.run_number }} || terraform workspace new test-${{ github.ref_name }}-${{ github.run_number }}
       - name: Terraform apply
-        run: terraform apply -auto-approve ${{ github.ref_name }}-${{ github.run_number }}-tfplan
+        run: terraform apply -auto-approve test-${{ github.ref_name }}-${{ github.run_number }}-tfplan
       - name: Terraform output
         id: terraform_output
         run: |
@@ -131,12 +131,14 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.12
-      - name: Terraform init
-        run: terraform init
-      - name: test Workspace
-        run: terraform workspace select test || terraform workspace new test
-      - name: Terraform destroy
-        run: terraform destroy -auto-approve
+      - name: Destroy test infrastructure
+        run: |
+          terraform init
+          terraform workspace select test-${{ github.ref_name }}-${{ github.run_number }} \
+          || terraform workspace new test-${{ github.ref_name }}-${{ github.run_number }}
+          terraform destroy -auto-approve
+          terraform workspace select default || terraform workspace new default
+          terraform workspace delete test-${{ github.ref_name }}-${{ github.run_number }}
         
   # deploy-production-infrastructure:
   #   runs-on: ubuntu-latest
