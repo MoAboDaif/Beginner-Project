@@ -1,0 +1,36 @@
+name: Terraform and HTML validation
+run-name: Terraform and HTML validation
+on:
+  pull_request:
+    branches:
+    -  main
+permissions: 
+  id-token: write
+  contents: read
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+      - name: NodeJS setup
+        uses: actions/setup-node@v4
+        with: 
+          version: "22.x"
+      - name: validate HTML
+        run: |
+          cd site
+          npx htmlhint "*.html"
+      - name: AWS OIDC Setup
+        uses: aws-actions/configure-aws-credentials@v4.3.1
+        with:
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v3
+      - name: Validate terraform
+        run: |
+          cd terraform
+          terraform init
+          terraform validate
+
