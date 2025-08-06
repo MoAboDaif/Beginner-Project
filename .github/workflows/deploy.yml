@@ -25,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: html-files
-          path: 'site/*.html'
+          path: 'site/*'
   build-test-infrastructure:
     runs-on: ubuntu-latest
     defaults:
@@ -107,6 +107,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: html-files
+          path: html-files-artifact-${{ github.run_id }}
       - name: config AWS credentials
         uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
@@ -114,7 +115,8 @@ jobs:
           aws-region: eu-central-1
       - name: Upload files to S3
         run: |
-          aws s3 sync . s3://${{ needs.deploy-test-infrastructure.outputs.test_bucket_name }} --exclude "*" --include "*.html"
+          cd html-files-artifact-${{ github.run_id }}
+          aws s3 sync . s3://${{ needs.deploy-test-infrastructure.outputs.test_bucket_name }}
           echo "Website deployed to: ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}"
   
   test-website:

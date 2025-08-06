@@ -1,17 +1,3 @@
-# resource "aws_s3_bucket" "backend" {
-#   bucket = "moabodaif-terraform-s3-backend"
-# }
-
-# resource "aws_dynamodb_table" "backend_lock" {
-#   name           = "backend-lock-table"
-#   read_capacity  = 5
-#   write_capacity = 5
-#   hash_key       = "LockID"
-#   attribute {
-#     name = "LockID"
-#     type = "S"
-#   }
-# }
 
 resource "aws_s3_bucket" "static_website" {
   bucket        = "moabodaif-static-website-bucket-${terraform.workspace}"
