@@ -225,7 +225,7 @@ jobs:
           && echo "Production Environemnt Deployed ... "
           cd ../html-files-artifact-${{ github.run_id }}
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
-          PROD_BUCKET_NAME=$(TF output -raw s3_bucket_name)
+          PROD_BUCKET_NAME=$($TF output -raw s3_bucket_name)
           aws s3 sync . s3://$PROD_BUCKET_NAME --recursive
-          echo "website url: $(TF output -raw static_website_url)"
+          echo "website url: $($TF output -raw static_website_url)"
 

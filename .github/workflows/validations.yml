@@ -1,0 +1,26 @@
+name: Terraform and HTML validation
+on:
+  pull_request:
+    branches:
+    -  main
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+      - name: NodeJS setup
+        uses: actions/setup-node@v4
+        with: 
+          version: "22.x"
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v3
+      - name: validate HTML
+        run: |
+          cd site
+          npx htmlhint "*.html"
+      - name: Validate terraform
+        run: |
+          cd terraform
+          terraform validate
+          
