@@ -19,11 +19,11 @@ jobs:
         run: |
           cd site
           npx htmlhint "*.html"
-      - name: AWS OIDC Setup
-        uses: aws-actions/configure-aws-credentials@v4.3.1
-        with:
-          aws-region: eu-central-1
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+      # - name: AWS OIDC Setup
+      #   uses: aws-actions/configure-aws-credentials@v4.3.1
+      #   with:
+      #     aws-region: eu-central-1
+      #     role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
       - name: Validate terraform
         run: |
           cd terraform
