@@ -1,9 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  </head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Check</title>
+  <style>
+    body {
+      background: #f6f8fa;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+    .healthcheck-container {
+      background: #fff;
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .healthcheck-container h1 {
+      color: #28a745;
+      margin-bottom: 0.5rem;
+    }
+    .healthcheck-container p {
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    .healthcheck-container a {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: #007bff;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .healthcheck-container a:hover {
+      background: #0056b3;
+    }
+    .health-icon {
+      font-size: 3rem;
+      color: #28a745;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+  </style>
+</head>
 <body>
   <div class="healthcheck-container">
+    <span class="health-icon">&#x2714;</span>
     <h1>The page is healthy!</h1>
     <p>Everything is working as expected.</p>
     <a href="/">Go back to Home</a>
