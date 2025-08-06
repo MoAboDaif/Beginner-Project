@@ -14,17 +14,17 @@ jobs:
         uses: actions/setup-node@v4
         with: 
           version: "22.x"
-      - name: Terraform Setup
-        uses: hashicorp/setup-terraform@v3
       - name: validate HTML
         run: |
           cd site
           npx htmlhint "*.html"
-      # - name: AWS OIDC Setup
-      #   uses: aws-actions/configure-aws-credentials@v4.3.1
-      #   with:
-      #     aws-region: eu-central-1
-      #     role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+      - name: AWS OIDC Setup
+        uses: aws-actions/configure-aws-credentials@v4.3.1
+        with:
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v3
       - name: Validate terraform
         run: |
           cd terraform
