@@ -162,7 +162,7 @@ jobs:
           terraform workspace delete test-${{ github.ref_name }}-${{ github.run_number }}
   
   Plan-Production-Env:
-    if: ${{ github.ref_name }} == "main"
+    if: ${{ github.ref_name }} == 'main'
     runs-on: ubuntu-latest
     needs:
       - test-website
