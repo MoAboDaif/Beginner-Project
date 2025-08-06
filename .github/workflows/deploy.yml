@@ -226,9 +226,15 @@ jobs:
           terraform workspace select production
           terraform apply -auto-approve production.tfplan \
           && echo "Production Environemnt Deployed ... "
-          cd ../html-files-artifact-${{ github.run_id }}
+          
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
           PROD_BUCKET_NAME=$($TF output -raw s3_bucket_name)
+          WEBSITE_URL=$($TF output -raw static_website_url)
+
+          echo "Bucket Name: $PROD_BUCKET_NAME"
+          echo "Website URL: $WEBSITE_URL"
+
+          cd ../html-files-artifact-${{ github.run_id }}
           aws s3 sync . s3://$PROD_BUCKET_NAME --recursive
-          echo "website url: $($TF output -raw static_website_url)"
+          echo "website Deployed at $WEBSITE_URL"
 
