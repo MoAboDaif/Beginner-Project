@@ -120,13 +120,15 @@ jobs:
       - upload-static-content
       - deploy-test-infrastructure
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - name: config AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
-          name: html-files
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
       - name: Run tests
         run: |
           echo "Running tests on the deployed website..."
+          aws s3 ls s3://${{ needs.deploy-test-infrastructure.outputs.test_bucket_name }}/healthcheck.html
           curl -I ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}/healthcheck.html
 
   destroy-test-infrastructure:
@@ -178,6 +180,7 @@ jobs:
           role-to-assume:  ${{ secrets.AWS_ROLE_ARN }}
       - name: Terraform Plan
         run: |
+          echo ${{ github.ref_name }}
           cd terraform
           terraform init
           terraform workspace select production || terraform workspace new production 
@@ -222,7 +225,7 @@ jobs:
           && echo "Production Environemnt Deployed ... "
           cd ../html-files-artifact-${{ github.run_id }}
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
-          PROD_BUCKET_NAME=$(tf output -raw s3_bucket_name)
+          PROD_BUCKET_NAME=$(TF output -raw s3_bucket_name)
           aws s3 sync . s3://$PROD_BUCKET_NAME --recursive
-          echo "website url: $(tf output -raw static_website_url)"
+          echo "website url: $(TF output -raw static_website_url)"
 
