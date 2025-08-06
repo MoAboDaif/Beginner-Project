@@ -45,15 +45,15 @@ jobs:
         run: terraform init
       - name: Terraform validate
         run: terraform validate
-      - name: ${{ github.ref_name }} Workspace
-        run: terraform workspace select  ${{ github.ref_name }}  || terraform workspace new  ${{ github.ref_name }}
+      - name: ${{ github.ref_name }} ${{ github.run_number }} Workspace
+        run: terraform workspace select  ${{ github.ref_name }}-${{ github.run_number }}  || terraform workspace new  ${{ github.ref_name }}-${{ github.run_number }}
       - name: Terraform plan
-        run: terraform plan -out=${{ github.ref_name }}-tfplan
+        run: terraform plan -out=${{ github.ref_name }}-${{ github.run_number }}-tfplan
       - name: artifact upload
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: ${{ github.ref_name }}-tfplan
+          path: ${{ github.ref_name }}-${{ github.run_number }}-tfplan
 
   test-deploy:
     runs-on: ubuntu-latest
@@ -84,9 +84,9 @@ jobs:
       - name: Terraform init
         run: terraform init
       - name: test Workspace
-        run: terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
+        run: terraform workspace select ${{ github.ref_name }}-${{ github.run_number }} || terraform workspace new ${{ github.ref_name }}-${{ github.run_number }}
       - name: Terraform apply
-        run: terraform apply -auto-approve ${{ github.ref_name }}-tfplan
+        run: terraform apply -auto-approve ${{ github.ref_name }}-${{ github.run_number }}-tfplan
       - name: Terraform output
         id: terraform_output
         run: |
