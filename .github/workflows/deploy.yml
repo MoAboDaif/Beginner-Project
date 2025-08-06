@@ -96,7 +96,7 @@ jobs:
 
   upload-website:
     runs-on: ubuntu-latest
-    needs: [web-content-test, test-deploy]
+    needs: [web-content-test, deploy-test-infrastructure]
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -109,13 +109,12 @@ jobs:
           aws-region: eu-central-1
       - name: Upload files to S3
         run: |
-          aws s3 sync . s3://${{ needs.test-deploy.outputs.test_bucket_name }} --exclude "*" --include "*.html"
-          echo "Website deployed to: ${{ needs.test-deploy.outputs.test_website_url }}"
+          aws s3 sync . s3://${{ needs.deploy-test-infrastructure.outputs.test_bucket_name }} --exclude "*" --include "*.html"
+          echo "Website deployed to: ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}"
   destroy-test-infrastructure:
     runs-on: ubuntu-latest
     needs: 
-      - test-deploy
-      - upload-website
+      - deploy-test-infrastructure
     environment: test-destroy-approval
     defaults:
       run:
