@@ -235,6 +235,6 @@ jobs:
           echo "Website URL: $WEBSITE_URL"
 
           cd ../html-files-artifact-${{ github.run_id }}
-          aws s3 sync . s3://$PROD_BUCKET_NAME --recursive
+          aws s3 sync . s3://$PROD_BUCKET_NAME
           echo "website Deployed at $WEBSITE_URL"
 
