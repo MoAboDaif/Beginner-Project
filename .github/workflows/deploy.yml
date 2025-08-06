@@ -33,12 +33,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: config AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
       - name: Terraform setup
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.12
       - name: Plan Terraform infrastructure
@@ -67,12 +67,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: config AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
           role-to-assume:  ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
       - name: Terraform setup
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.12
       - name: Download artifact
@@ -94,7 +94,7 @@ jobs:
           echo "test_bucket_name=$($TF output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
           echo "test_website_url=$($TF output -raw static_website_url)" >> $GITHUB_OUTPUT
 
-  upload-website:
+  upload-static-content:
     runs-on: ubuntu-latest
     needs: [web-content-test, deploy-test-infrastructure]
     steps:
@@ -103,7 +103,7 @@ jobs:
         with:
           name: html-files
       - name: config AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
@@ -123,12 +123,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: config AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
       - name: Terraform setup
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.12
       - name: Destroy test infrastructure
@@ -139,45 +139,75 @@ jobs:
           terraform destroy -auto-approve
           terraform workspace select default || terraform workspace new default
           terraform workspace delete test-${{ github.ref_name }}-${{ github.run_number }}
-        
-  # deploy-production-infrastructure:
-  #   runs-on: ubuntu-latest
-  #   needs: test-deploy
-  #   environment: production-infrastructure-approval
-  #   defaults:
-  #     run:
-  #       working-directory: terraform
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #     - name: config AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v3
-  #       with:
-  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-  #         aws-region: eu-central-1
-  #     - name: Terraform setup
-  #       uses: hashicorp/setup-terraform@v2
-  #       with:
-  #         terraform_version: 1.12
-  #     - name: Terraform init
-  #       run: terraform init
-  #     - name: test Workspace
-  #       run: terraform workspace select production || terraform workspace new production
-  #     - name: Terraform apply
-  #       run: terraform apply -auto-approve
-  # deploy-production-website:
-  #   runs-on: ubuntu-latest
-  #   needs: deploy-production-infrastructure
-  #   steps:
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: html-files
-  #     - name: config AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v3
-  #       with:
-  #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-  #         aws-region: eu-central-1
-  #     - name: Upload files to S3
-  #       run: |
-  #         aws s3 sync . s3://$AWS_S3_BUCKET_NAME --exclude "*" --include "*.html"
+  test-website:
+    runs-on: ubuntu-latest
+    needs: 
+      - upload-static-content
+      - deploy-test-infrastructure
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: html-files
+      - name: Run tests
+        run: |
+          echo "Running tests on the deployed website..."
+          curl -I ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}/healthcheck.html
+  
+  Plan-Production-Env:
+    if: ${{ github.ref_name }} == "main"
+    runs-on: ubuntu-latest
+    needs:
+      - test-website
+      - destroy-test-infrastructure
+    steps: 
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: AWS security credentials
+        uses: aws-actions/configure-aws-credentials@v4.3.1
+        with:
+          audience: sts.amazonaws.com
+          aws-region: eu-central-1
+          role-to-assume:  ${{ secrets.AWS_ROLE_ARN }}
+      - name: Terraform Plan
+        run: |
+          cd terraform
+          terraform init
+          terraform workspace select production || terraform workspace new production 
+          terraform plan -out=production.tfplan
+      - name: Upload Production Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Production-Plan
+          path: terraform/production.tfplan
+  Deploy-Production-Env:
+    runs-on: ubuntu-latest
+    needs:
+      - Plan-Production-Env
+    environment:
+      name: production-infrastructure-approval
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: AWS OIDC Setup
+        uses: aws-actions/configure-aws-credentials@v4.3.1
+        with:
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+      - name: Plan Artifact Download
+        uses: actions/download-artifact@v4
+        with:
+          name: Production-Plan
+          path: terraform
+      - name: Deploy Production Env
+        run: |
+          cd terraform
+          terraform init
+          terraform workspace select production
+          terraform apply -auto-approve production.tfplan \
+          && echo "Production Environemnt Deployed ... "
+
