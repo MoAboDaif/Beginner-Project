@@ -25,7 +25,6 @@ jobs:
           path: 'site/*.html'
   build-test-infrastructure:
     runs-on: ubuntu-latest
-    needs: web-content-test
     defaults:
       run:
         working-directory: terraform
@@ -59,7 +58,9 @@ jobs:
     outputs:
       test_bucket_name: ${{ steps.terraform_output.outputs.test_bucket_name }}
       test_website_url: ${{ steps.terraform_output.outputs.test_website_url }}
-    needs: build-test-infrastructure
+    needs: 
+      - build-test-infrastructure
+      - web-content-test
     defaults:
       run:
         working-directory: terraform
@@ -90,13 +91,14 @@ jobs:
         id: terraform_output
         run: |
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
-
           echo "test_bucket_name=$($TF output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
           echo "test_website_url=$($TF output -raw static_website_url)" >> $GITHUB_OUTPUT
 
   upload-static-content:
     runs-on: ubuntu-latest
-    needs: [web-content-test, deploy-test-infrastructure]
+    needs: 
+      - web-content-test 
+      - deploy-test-infrastructure
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -111,6 +113,22 @@ jobs:
         run: |
           aws s3 sync . s3://${{ needs.deploy-test-infrastructure.outputs.test_bucket_name }} --exclude "*" --include "*.html"
           echo "Website deployed to: ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}"
+  
+  test-website:
+    runs-on: ubuntu-latest
+    needs: 
+      - upload-static-content
+      - deploy-test-infrastructure
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: html-files
+      - name: Run tests
+        run: |
+          echo "Running tests on the deployed website..."
+          curl -I ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}/healthcheck.html
+
   destroy-test-infrastructure:
     runs-on: ubuntu-latest
     needs: 
@@ -139,20 +157,6 @@ jobs:
           terraform destroy -auto-approve
           terraform workspace select default || terraform workspace new default
           terraform workspace delete test-${{ github.ref_name }}-${{ github.run_number }}
-  test-website:
-    runs-on: ubuntu-latest
-    needs: 
-      - upload-static-content
-      - deploy-test-infrastructure
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: html-files
-      - name: Run tests
-        run: |
-          echo "Running tests on the deployed website..."
-          curl -I ${{ needs.deploy-test-infrastructure.outputs.test_website_url }}/healthcheck.html
   
   Plan-Production-Env:
     if: ${{ github.ref_name }} == "main"
@@ -203,6 +207,11 @@ jobs:
         with:
           name: Production-Plan
           path: terraform
+      - name: Static Content Artifact Download
+        uses: actions/download-artifact@v4
+        with:
+          name: html-files
+          path: html-files-artifact-${{ github.run_id }}
       - name: Deploy Production Env
         run: |
           cd terraform
@@ -210,4 +219,9 @@ jobs:
           terraform workspace select production
           terraform apply -auto-approve production.tfplan \
           && echo "Production Environemnt Deployed ... "
+          cd ../html-files-artifact-${{ github.run_id }}
+          TF="$TERRAFORM_CLI_PATH/terraform-bin"
+          PROD_BUCKET_NAME=$(tf output -raw s3_bucket_name)
+          aws s3 sync . s3://$PROD_BUCKET_NAME --recursive
+          echo "website url: $(tf output -raw static_website_url)"
 
