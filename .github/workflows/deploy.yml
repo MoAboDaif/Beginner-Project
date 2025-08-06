@@ -2,6 +2,9 @@ name: deploy s3 static website
 run-name:  Beginner Project – “Static Product Portfolio Site”
 on:
   push:
+    branches:
+    - main
+  workflow_dispatch:
 permissions: 
   id-token: write
   contents: read
