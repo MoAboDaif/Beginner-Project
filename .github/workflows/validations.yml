@@ -16,7 +16,7 @@ jobs:
       - name: NodeJS setup
         uses: actions/setup-node@v4
         with: 
-          version: "22.x"
+          node-version: "22.x"
       - name: validate HTML
         run: |
           cd site
