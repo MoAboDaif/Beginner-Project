@@ -23,7 +23,7 @@ jobs:
         with:
           name: html-files
           path: 'site/*.html'
-  test-infrastructure:
+  build-test-infrastructure:
     runs-on: ubuntu-latest
     needs: web-content-test
     defaults:
@@ -41,26 +41,25 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.12
-      - name: Terraform init
-        run: terraform init
-      - name: Terraform validate
-        run: terraform validate
-      - name: ${{ github.ref_name }} ${{ github.run_number }} Workspace
-        run: terraform workspace select  ${{ github.ref_name }}-${{ github.run_number }}  || terraform workspace new  ${{ github.ref_name }}-${{ github.run_number }}
-      - name: Terraform plan
-        run: terraform plan -out=${{ github.ref_name }}-${{ github.run_number }}-tfplan
+      - name: Plan Terraform infrastructure
+        run: |
+          terraform init
+          terraform validate
+          terraform workspace select  ${{ github.ref_name }}-${{ github.run_number }} \
+          || terraform workspace new  ${{ github.ref_name }}-${{ github.run_number }} 
+          terraform plan -out=${{ github.ref_name }}-${{ github.run_number }}-tfplan
       - name: artifact upload
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: ${{ github.ref_name }}-${{ github.run_number }}-tfplan
+          path: terraform/${{ github.ref_name }}-${{ github.run_number }}-tfplan
 
-  test-deploy:
+  deploy-test-infrastructure:
     runs-on: ubuntu-latest
     outputs:
       test_bucket_name: ${{ steps.terraform_output.outputs.test_bucket_name }}
       test_website_url: ${{ steps.terraform_output.outputs.test_website_url }}
-    needs: test-infrastructure
+    needs: build-test-infrastructure
     defaults:
       run:
         working-directory: terraform
