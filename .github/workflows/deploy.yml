@@ -95,7 +95,7 @@ jobs:
         run: |
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
           echo "test_bucket_name=$($TF output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
-          echo "test_website_url=$($TF output -raw static_website_url)" >> $GITHUB_OUTPUT
+          echo "test_website_url=$($TF output -raw cloudfront_distribution)" >> $GITHUB_OUTPUT
 
   upload-static-content:
     runs-on: ubuntu-latest
@@ -231,7 +231,7 @@ jobs:
           
           TF="$TERRAFORM_CLI_PATH/terraform-bin"
           PROD_BUCKET_NAME=$($TF output -raw s3_bucket_name)
-          WEBSITE_URL=$($TF output -raw static_website_url)
+          WEBSITE_URL=$($TF output -raw cloudfront_distribution)
 
           echo "Bucket Name: $PROD_BUCKET_NAME"
           echo "Website URL: $WEBSITE_URL"
